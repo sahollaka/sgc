@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Game Center Timers</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #111;
+      color: #eee;
+      padding: 20px;
+    }
+
+    .main-title {
+      text-align: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: #ff4c4c;
+      text-shadow: 0 0 10px #ff4c4c, 0 0 20px #ff1a1a;
+      margin-bottom: 10px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 20px;
+      color: #ccc;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+
+    #players {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .player {
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 15px;
+      border: 6px solid blue;
+      box-shadow: 0 4px 12px rgba(255, 76, 76, 0.1);
+      text-align: center;
+      transition: 0.3s ease;
+    }
+
+    .player.started {
+      border: 6px solid green;
+    }
+
+    .player.paused {
+      border: 6px solid red;  /* نارەنجی بۆ pause */
+    }
+
+    .player:hover {
+      box-shadow: 0 4px 20px rgba(255, 76, 76, 0.3);
+    }
+
+    .player h4 {
+      margin-bottom: 0px;
+      color: #ff4c4c; 
+      font-size: xx-large;  
+    }
+
+    .time {
+      font-size: 24px;
+      margin: 8px 0;
+      transition: color 0.3s ease;
+    }
+
+    .time.running {
+      color: #00ff00;
+    }
+
+    .time.paused {
+      color: #ff3333;
+    }
+
+    .cost {
+      font-size: 20px;
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .start-btn {
+      background-color: #4CAF50;
+    }
+
+    .pause-btn {
+      background-color: #ff4c4c;
+    }
+
+    .resume-btn {
+      background-color: #4CAF50;
+    }
+
+    .reset-btn {
+      background-color: #ff6600;
+    }
+
+    table {
+      width: 300px;
+      margin: 20px auto;
+      border-collapse: collapse;
+      color: #eee;
+    }
+
+    table, th, td {
+      border: 1px solid #555;
+    }
+
+    th, td {
+      padding: 8px 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #444;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h2 class="main-title">🎮 Sahollaka Game Center</h2>
+  
+
+  <table>
+    <thead>
+      <tr>
+        <th style="color: #4CAF50;">(Started)</th>
+        <th style="color: #ff4c4c;">(Not Started)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td id="countStarted">0</td>
+        <td id="countNotStarted">0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div id="players"></div>
+
+  <script>
+    const numPlayers = 40;
+    const playersDiv = document.getElementById('players');
+    const pricePerHour = 3000;
+    let intervals = {};
+
+    function format(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSeconds % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function toggleButtons(i, state) {
+      const startBtn = document.getElementById(`startBtn${i}`);
+      const pauseBtn = document.getElementById(`pauseBtn${i}`);
+      const resumeBtn = document.getElementById(`resumeBtn${i}`);
+      const resetBtn = document.getElementById(`resetBtn${i}`);
+      const time = document.getElementById(`time${i}`);
+
+      if (state === 'initial') {
+        startBtn.style.display = 'inline-block';
+        pauseBtn.style.display = 'none';
+        resumeBtn.style.display = 'none';
+        resetBtn.style.display = 'none';
+        time.classList.remove("running", "paused");
+      } else if (state === 'started') {
+        startBtn.style.display = 'none';
+        pauseBtn.style.display = 'inline-block';
+        resumeBtn.style.display = 'none';
+        resetBtn.style.display = 'inline-block';
+        time.classList.add("running");
+        time.classList.remove("paused");
+      } else if (state === 'paused') {
+        startBtn.style.display = 'none';
+        pauseBtn.style.display = 'none';
+        resumeBtn.style.display = 'inline-block';
+        resetBtn.style.display = 'inline-block';
+        time.classList.add("paused");
+        time.classList.remove("running");
+      }
+    }
+
+    function loadPlayer(i) {
+      const playerKey = `player${i}`;
+      const div = document.createElement('div');
+      div.className = 'player';
+      div.id = `playerBox${i}`;
+      div.innerHTML = `
+        <h4>PC ${i}</h4>
+        <div class="time" id="time${i}">00:00:00</div>
+        <div class="cost" id="cost${i}">💰 0 دینار</div>
+        <button id="startBtn${i}" class="start-btn">Start</button>
+        <button id="pauseBtn${i}" class="pause-btn" style="display:none;">Pause</button>
+        <button id="resumeBtn${i}" class="resume-btn" style="display:none;">Resume</button>
+        <button id="resetBtn${i}" class="reset-btn" style="display:none;">Reset</button>
+      `;
+      playersDiv.appendChild(div);
+
+      const startBtn = document.getElementById(`startBtn${i}`);
+      const pauseBtn = document.getElementById(`pauseBtn${i}`);
+      const resumeBtn = document.getElementById(`resumeBtn${i}`);
+      const resetBtn = document.getElementById(`resetBtn${i}`);
+      const playerBox = document.getElementById(`playerBox${i}`);
+
+      let stored = JSON.parse(localStorage.getItem(playerKey));
+
+      if (!stored) {
+        toggleButtons(i, 'initial');
+      } else {
+        if (stored.isRunning) {
+          startTimer(i);
+          toggleButtons(i, 'started');
+          playerBox.classList.add("started");
+          playerBox.classList.remove("paused");
+        } else if (stored.elapsedTime > 0) {
+          toggleButtons(i, 'paused');
+          updateDisplay(i, stored.elapsedTime);
+          playerBox.classList.add("paused");
+          playerBox.classList.remove("started");
+        } else {
+          toggleButtons(i, 'initial');
+          playerBox.classList.remove("started", "paused");
+        }
+      }
+
+      startBtn.onclick = () => {
+        startTimer(i);
+        toggleButtons(i, 'started');
+        playerBox.classList.add("started");
+        playerBox.classList.remove("paused");
+        updateCounts();
+      };
+
+      pauseBtn.onclick = () => {
+        pauseTimer(i);
+        toggleButtons(i, 'paused');
+        playerBox.classList.remove("started");
+        playerBox.classList.add("paused");
+        updateCounts();
+      };
+
+      resumeBtn.onclick = () => {
+        resumeTimer(i);
+        toggleButtons(i, 'started');
+        playerBox.classList.add("started");
+        playerBox.classList.remove("paused");
+        updateCounts();
+      };
+
+      resetBtn.onclick = () => {
+        resetTimer(i);
+        toggleButtons(i, 'initial');
+        playerBox.classList.remove("started", "paused");
+        updateCounts();
+      };
+    }
+
+    function startTimer(i) {
+      const playerKey = `player${i}`;
+      let stored = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime: 0, startTime: 0, isRunning: false };
+
+      if (!stored.isRunning) {
+        stored.startTime = Date.now();
+        stored.isRunning = true;
+        localStorage.setItem(playerKey, JSON.stringify(stored));
+      }
+
+      if (intervals[i]) clearInterval(intervals[i]);
+
+      intervals[i] = setInterval(() => {
+        let data = JSON.parse(localStorage.getItem(playerKey));
+        if (!data || !data.isRunning) return clearInterval(intervals[i]);
+        const elapsed = data.elapsedTime + (Date.now() - data.startTime);
+        updateDisplay(i, elapsed);
+      }, 1000);
+    }
+
+    function pauseTimer(i) {
+      const playerKey = `player${i}`;
+      let stored = JSON.parse(localStorage.getItem(playerKey));
+      if (!stored || !stored.isRunning) return;
+
+      const elapsed = stored.elapsedTime + (Date.now() - stored.startTime);
+      stored.elapsedTime = elapsed;
+      stored.isRunning = false;
+      stored.startTime = 0;
+      localStorage.setItem(playerKey, JSON.stringify(stored));
+
+      if (intervals[i]) clearInterval(intervals[i]);
+      updateDisplay(i, stored.elapsedTime);
+    }
+
+    function resumeTimer(i) {
+      const playerKey = `player${i}`;
+      let stored = JSON.parse(localStorage.getItem(playerKey));
+      if (!stored) return;
+
+      if (!stored.isRunning) {
+        stored.startTime = Date.now();
+        stored.isRunning = true;
+        localStorage.setItem(playerKey, JSON.stringify(stored));
+      }
+
+      if (intervals[i]) clearInterval(intervals[i]);
+      intervals[i] = setInterval(() => {
+        let data = JSON.parse(localStorage.getItem(playerKey));
+        if (!data || !data.isRunning) return clearInterval(intervals[i]);
+        const elapsed = data.elapsedTime + (Date.now() - data.startTime);
+        updateDisplay(i, elapsed);
+      }, 1000);
+    }
+
+    function resetTimer(i) {
+      const playerKey = `player${i}`;
+      localStorage.removeItem(playerKey);
+      if (intervals[i]) clearInterval(intervals[i]);
+      updateDisplay(i, 0);
+    }
+
+    function updateDisplay(i, elapsed) {
+      document.getElementById(`time${i}`).textContent = format(elapsed);
+      const hours = elapsed / (1000 * 60 * 60);
+      const cost = Math.floor(hours * pricePerHour);
+      document.getElementById(`cost${i}`).textContent = `💰 ${cost} دینار`;
+    }
+
+    function updateCounts() {
+      let startedCount = 0;
+      let notStartedCount = 0;
+      for (let i = 1; i <= numPlayers; i++) {
+        const playerKey = `player${i}`;
+        let stored = JSON.parse(localStorage.getItem(playerKey));
+        if (stored && stored.isRunning) {
+          startedCount++;
+        } else {
+          notStartedCount++;
+        }
+      }
+      document.getElementById('countStarted').textContent = startedCount;
+      document.getElementById('countNotStarted').textContent = notStartedCount;
+    }
+
+    for (let i = 1; i <= numPlayers; i++) {
+      loadPlayer(i);
+    }
+    updateCounts();
+  </script>
+
+</body>
+</html>
