@@ -49,7 +49,7 @@
     }
 
     .player.paused {
-      border: 6px solid red;  /* نارەنجی بۆ pause */
+      border: 6px solid red;
     }
 
     .player:hover {
@@ -57,9 +57,22 @@
     }
 
     .player h4 {
-      margin-bottom: 0px;
-      color: #ff4c4c; 
-      font-size: xx-large;  
+      margin-top: 0;
+      margin-bottom: 4px;
+      color: #ff4c4c;
+      font-size: 1.8em;
+    }
+
+    #players input.name-input {
+      width: 90%;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #888;
+      font-size: 1em;
+      background: #222;
+      color: #eee;
+      margin-top: 0;
+      margin-bottom: 12px;
     }
 
     .time {
@@ -138,7 +151,6 @@
 <body>
 
   <h2 class="main-title">🎮 Sahollaka Game Center</h2>
-  
 
   <table>
     <thead>
@@ -207,7 +219,8 @@
       div.className = 'player';
       div.id = `playerBox${i}`;
       div.innerHTML = `
-        <h4>PC ${i}</h4>
+        <h4 id="playerName${i}">PC ${i}</h4>
+        <input type="text" id="nameInput${i}" class="name-input" placeholder="ناوی یاریزان" />
         <div class="time" id="time${i}">00:00:00</div>
         <div class="cost" id="cost${i}">💰 0 دینار</div>
         <button id="startBtn${i}" class="start-btn">Start</button>
@@ -222,8 +235,15 @@
       const resumeBtn = document.getElementById(`resumeBtn${i}`);
       const resetBtn = document.getElementById(`resetBtn${i}`);
       const playerBox = document.getElementById(`playerBox${i}`);
+      const nameInput = document.getElementById(`nameInput${i}`);
+      const playerName = document.getElementById(`playerName${i}`);
 
       let stored = JSON.parse(localStorage.getItem(playerKey));
+
+      if (stored && stored.name) {
+        nameInput.value = stored.name;
+        playerName.textContent = stored.name || `PC ${i}`;
+      }
 
       if (!stored) {
         toggleButtons(i, 'initial');
@@ -243,6 +263,13 @@
           playerBox.classList.remove("started", "paused");
         }
       }
+
+      nameInput.addEventListener('input', () => {
+        let currentData = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime:0, startTime:0, isRunning:false };
+        currentData.name = nameInput.value;
+        localStorage.setItem(playerKey, JSON.stringify(currentData));
+        playerName.textContent = nameInput.value || `PC ${i}`;
+      });
 
       startBtn.onclick = () => {
         startTimer(i);
