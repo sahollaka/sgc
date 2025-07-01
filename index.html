@@ -17,7 +17,22 @@
       color: #ff4c4c;
       text-shadow: 0 0 10px #ff4c4c, 0 0 20px #ff1a1a;
       margin-bottom: 10px;
-      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .global-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+      transition: background 0.3s ease;
+    }
+
+    .global-btn:hover {
+      opacity: 0.85;
     }
 
     .subtitle {
@@ -145,12 +160,17 @@
     th {
       background-color: #444;
     }
-
   </style>
 </head>
 <body>
 
   <h2 class="main-title">🎮 Sahollaka Game Center</h2>
+
+  <div style="text-align:center; margin-bottom: 30px;">
+    <button onclick="pauseAll()" style="background:#ff4c4c;" class="global-btn">⏸️ Pause All</button>
+    <button onclick="startAll()" style="background:#4CAF50;" class="global-btn">▶️ Start All</button>
+    <button onclick="resetAll()" style="background:#ff6600;" class="global-btn">🔄 Reset All </button>
+  </div>
 
   <table>
     <thead>
@@ -388,11 +408,50 @@
       document.getElementById('countNotStarted').textContent = notStartedCount;
     }
 
+    function pauseAll() {
+      for (let i = 1; i <= numPlayers; i++) {
+        const playerKey = `player${i}`;
+        let stored = JSON.parse(localStorage.getItem(playerKey));
+        if (stored && stored.isRunning) {
+          pauseTimer(i);
+          toggleButtons(i, 'paused');
+          document.getElementById(`playerBox${i}`).classList.remove("started");
+          document.getElementById(`playerBox${i}`).classList.add("paused");
+        }
+      }
+      updateCounts();
+    }
+
+    function startAll() {
+      for (let i = 1; i <= numPlayers; i++) {
+        const playerKey = `player${i}`;
+        let stored = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime: 0, startTime: 0, isRunning: false };
+        if (!stored.isRunning) {
+          startTimer(i);
+          toggleButtons(i, 'started');
+          document.getElementById(`playerBox${i}`).classList.add("started");
+          document.getElementById(`playerBox${i}`).classList.remove("paused");
+        }
+      }
+      updateCounts();
+    }
+
+    function resetAll() {
+      if (confirm("دڵنیایت دەتەوێت هەموو تایمەرەکان ڕیستارت بکەیت؟")) {
+        for (let i = 1; i <= numPlayers; i++) {
+          resetTimer(i);
+          toggleButtons(i, 'initial');
+          document.getElementById(`playerBox${i}`).classList.remove("started", "paused");
+        }
+        updateCounts();
+      }
+    }
+
     for (let i = 1; i <= numPlayers; i++) {
       loadPlayer(i);
     }
+
     updateCounts();
   </script>
-
 </body>
 </html>
