@@ -3,189 +3,162 @@
 <head>
   <title>Game Center Timers</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #111;
-      color: #eee;
-      padding: 20px;
-    }
+ body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #111;
+  color: #eee;
+  padding: 20px;
+}
 
-    .main-title {
-      text-align: center;
-      font-size: 48px;
-      font-weight: bold;
-      color: #c63636;
-      text-shadow: 0 0 10px #000000, 0 0 20px #250000;
-      margin-bottom: 10px;
-    }
+.main-title {
+  text-align: center;
+  font-size: 48px;
+  font-weight: bold;
+  color: #c63636;
+  text-shadow: 0 0 10px #000000, 0 0 20px #250000;
+  margin-bottom: 10px;
+}
 
-    .global-btn {
-      border: none;
-      border-radius: 8px;
-      padding: 8px 18px;
-      color: white;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      margin: 5px;
-      transition: background 0.3s ease;
-    }
+.global-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px;
+  transition: background 0.3s ease;
+}
 
-    .global-btn:hover {
-      opacity: 0.85;
-    }
+.global-btn:hover {
+  opacity: 0.85;
+}
 
-    .subtitle {
-      text-align: center;
-      font-size: 20px;
-      color: #ccc;
-      margin-bottom: 30px;
-      font-style: italic;
-    }
+#players {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 15px;
+}
 
-    #players {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 15px;
-    }
+.player {
+  background: #032648;
+  border-radius: 12px;
+  padding: 15px;
+  border: 6px solid rgb(8, 81, 146);
+  box-shadow: 0 4px 12px rgba(255, 76, 76, 0.1);
+  text-align: center;
+  transition: 0.3s ease;
+}
 
-    .player {
-      background: #032648;
-      border-radius: 12px;
-      padding: 15px;
-      border: 6px solid rgb(8, 81, 146);
-      box-shadow: 0 4px 12px rgba(255, 76, 76, 0.1);
-      text-align: center;
-      transition: 0.3s ease;
-    }
+.player.started {
+  border: 6px solid rgb(6, 96, 6);
+  background-color: #002005;
+  
+}
 
-    .player.started {
-      border: 6px solid rgb(6, 96, 6);
-      background-color: #002005;
-      
-    }
+.player.paused {
+  border: 6px solid rgb(99, 8, 8);
+  background-color: rgb(44, 2, 2);
+}
 
-    .player.paused {
-      border: 6px solid rgb(99, 8, 8);
-      background-color: rgb(44, 2, 2);
-    }
+.player h4 {
+  margin-top: 0;
+  margin-bottom: 4px;
+  font-size: 1.8em;
+  color: #408df7;
+}
 
-    .player:hover {
-      box-shadow: 0 4px 20px rgba(255, 76, 76, 0.3);
-    }
+.player.started h4 { color: #0fa514; }
+.player.paused h4 { color: #a72929; }
 
-    .player h4 {
-      margin-top: 0;
-      margin-bottom: 4px;
-      color: #408df7;
-      font-size: 1.8em;
-    }
+.time {
+  font-size: 24px;
+  margin: 8px 0;
+}
 
-    .player.started h4 {
-      margin-top: 0;
-      margin-bottom: 4px;
-      color: #0fa514;
-      font-size: 1.8em;
-    }
+.time.running { color: #00ff00; }
+.time.paused { color: #ff3333; }
 
-     .player.paused h4 {
-      margin-top: 0;
-      margin-bottom: 4px;
-      color: #a72929;
-      font-size: 1.8em;
-    }
+.cost {
+  font-size: 20px;
+  color: #ffd700;
+  margin-bottom: 10px;
+}
 
-    
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 14px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 4px;
+  transition: background 0.2s ease;
+}
 
-    #players input.name-input {
-      width: 90%;
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid #888;
-      font-size: 1em;
-      background: #222;
-      color: #eee;
-      margin-top: 0;
-      margin-bottom: 12px;
-    }
+.start-btn { background-color: #4CAF50; }
+.pause-btn { background-color: #ff4c4c; }
+.resume-btn { background-color: #4CAF50; }
+.reset-btn { background-color: #ff6600; }
 
-    .time {
-      font-size: 24px;
-      margin: 8px 0;
-      transition: color 0.3s ease;
-    }
+table {
+  width: 300px;
+  margin: 20px auto;
+  border-collapse: collapse;
+  color: #eee;
+}
 
-    .time.running {
-      color: #00ff00;
-    }
+table, th, td {
+  border: 1px solid #555;
+}
 
-    .time.paused {
-      color: #ff3333;
-    }
+th, td {
+  padding: 8px 12px;
+  text-align: center;
+}
 
-    .cost {
-      font-size: 20px;
-      color: #ffd700;
-      margin-bottom: 10px;
-    }
+th {
+  background-color: #444;
+}
 
-    button {
-      border: none;
-      border-radius: 8px;
-      padding: 8px 18px;
-      font-size: 14px;
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-      margin: 4px;
-      transition: background 0.2s ease;
-    }
+#players input.name-input {
+  width: 90%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #888;
+  font-size: 1em;
+  background: #222;
+  color: #eee;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
 
-    button:hover {
-      opacity: 0.9;
-    }
-
-    .start-btn {
-      background-color: #4CAF50;
-    }
-
-    .pause-btn {
-      background-color: #ff4c4c;
-    }
-
-    .resume-btn {
-      background-color: #4CAF50;
-    }
-
-    .reset-btn {
-      background-color: #ff6600;
-    }
-
-    table {
-      width: 300px;
-      margin: 20px auto;
-      border-collapse: collapse;
-      color: #eee;
-    }
-
-    table, th, td {
-      border: 1px solid #555;
-    }
-
-    th, td {
-      padding: 8px 12px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #444;
-    }
   </style>
 </head>
 <body>
 
   <h2 class="main-title">🎮 Sahollaka Game Center</h2>
 
+  <!-- ➕ زیادکردنی پارەی خواردن -->
+  <div style="margin-bottom: 30px; text-align:center;">
+    <h3 style="color:#ffd700;">➕ زیادکردنی پارەی خواردن</h3>
+    <select id="foodTargetSelect" style="padding:6px 10px; border-radius:8px;">
+      <option disabled selected>PC یەک هەلبژێرە</option>
+      <script>
+        for (let i = 1; i <= 40; i++) {
+          document.write(`<option value="${i}">PC ${i}</option>`);
+        }
+      </script>
+    </select>
+    <input type="text" id="foodNameInput" placeholder="ناوی خواردن" style="padding:6px 10px; border-radius:8px; margin-left:8px;" />
+    <input type="number" id="foodPriceInput" placeholder="نرخی دینار" style="padding:6px 10px; border-radius:8px; margin-left:8px; width:100px;" />
+    <button onclick="addFood()" style="background:#ffb300;" class="global-btn">➕ زیاد بکە</button>
+    <button onclick="showFoodList()" style="background:#0088cc;" class="global-btn">🍔 خواردنەکان</button>
+  </div>
+
+  <!-- Global Controls -->
   <div style="text-align:center; margin-bottom: 30px;">
     <button onclick="pauseAll()" style="background:#ff4c4c;" class="global-btn">⏸️ Pause All</button>
     <button onclick="startAll()" style="background:#4CAF50;" class="global-btn">▶️ Start All</button>
@@ -224,33 +197,23 @@
     }
 
     function toggleButtons(i, state) {
-      const startBtn = document.getElementById(`startBtn${i}`);
-      const pauseBtn = document.getElementById(`pauseBtn${i}`);
-      const resumeBtn = document.getElementById(`resumeBtn${i}`);
-      const resetBtn = document.getElementById(`resetBtn${i}`);
-      const time = document.getElementById(`time${i}`);
+      document.getElementById(`startBtn${i}`).style.display = state === 'initial' ? 'inline-block' : 'none';
+      document.getElementById(`pauseBtn${i}`).style.display = state === 'started' ? 'inline-block' : 'none';
+      document.getElementById(`resumeBtn${i}`).style.display = state === 'paused' ? 'inline-block' : 'none';
+      document.getElementById(`resetBtn${i}`).style.display = state !== 'initial' ? 'inline-block' : 'none';
+    }
 
-      if (state === 'initial') {
-        startBtn.style.display = 'inline-block';
-        pauseBtn.style.display = 'none';
-        resumeBtn.style.display = 'none';
-        resetBtn.style.display = 'none';
-        time.classList.remove("running", "paused");
-      } else if (state === 'started') {
-        startBtn.style.display = 'none';
-        pauseBtn.style.display = 'inline-block';
-        resumeBtn.style.display = 'none';
-        resetBtn.style.display = 'inline-block';
-        time.classList.add("running");
-        time.classList.remove("paused");
-      } else if (state === 'paused') {
-        startBtn.style.display = 'none';
-        pauseBtn.style.display = 'none';
-        resumeBtn.style.display = 'inline-block';
-        resetBtn.style.display = 'inline-block';
-        time.classList.add("paused");
-        time.classList.remove("running");
-      }
+    function updateDisplay(i, elapsed) {
+      document.getElementById(`time${i}`).textContent = format(elapsed);
+      const hours = elapsed / (1000 * 60 * 60);
+      const gameCost = Math.floor(hours * pricePerHour);
+
+      const playerKey = `player${i}`;
+      let stored = JSON.parse(localStorage.getItem(playerKey));
+      const foodCost = stored?.foodTotal || 0;
+
+      const totalCost = gameCost + foodCost;
+      document.getElementById(`cost${i}`).textContent = `🎮 ${gameCost} + 🍔 ${foodCost} = 💰 ${totalCost} دینار`;
     }
 
     function loadPlayer(i) {
@@ -270,19 +233,13 @@
       `;
       playersDiv.appendChild(div);
 
-      const startBtn = document.getElementById(`startBtn${i}`);
-      const pauseBtn = document.getElementById(`pauseBtn${i}`);
-      const resumeBtn = document.getElementById(`resumeBtn${i}`);
-      const resetBtn = document.getElementById(`resetBtn${i}`);
-      const playerBox = document.getElementById(`playerBox${i}`);
       const nameInput = document.getElementById(`nameInput${i}`);
       const playerName = document.getElementById(`playerName${i}`);
-
       let stored = JSON.parse(localStorage.getItem(playerKey));
 
       if (stored && stored.name) {
         nameInput.value = stored.name;
-        playerName.textContent = stored.name || `PC ${i}`;
+        playerName.textContent = stored.name;
       }
 
       if (!stored) {
@@ -291,54 +248,42 @@
         if (stored.isRunning) {
           startTimer(i);
           toggleButtons(i, 'started');
-          playerBox.classList.add("started");
-          playerBox.classList.remove("paused");
+          div.classList.add("started");
         } else if (stored.elapsedTime > 0) {
-          toggleButtons(i, 'paused');
           updateDisplay(i, stored.elapsedTime);
-          playerBox.classList.add("paused");
-          playerBox.classList.remove("started");
-        } else {
-          toggleButtons(i, 'initial');
-          playerBox.classList.remove("started", "paused");
+          toggleButtons(i, 'paused');
+          div.classList.add("paused");
         }
       }
 
       nameInput.addEventListener('input', () => {
-        let currentData = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime:0, startTime:0, isRunning:false };
-        currentData.name = nameInput.value;
-        localStorage.setItem(playerKey, JSON.stringify(currentData));
+        let data = JSON.parse(localStorage.getItem(playerKey)) || {};
+        data.name = nameInput.value;
+        localStorage.setItem(playerKey, JSON.stringify(data));
         playerName.textContent = nameInput.value || `PC ${i}`;
       });
 
-      startBtn.onclick = () => {
-        startTimer(i);
-        toggleButtons(i, 'started');
-        playerBox.classList.add("started");
-        playerBox.classList.remove("paused");
+      document.getElementById(`startBtn${i}`).onclick = () => {
+        startTimer(i); toggleButtons(i, 'started');
+        div.classList.add("started"); div.classList.remove("paused");
         updateCounts();
       };
 
-      pauseBtn.onclick = () => {
-        pauseTimer(i);
-        toggleButtons(i, 'paused');
-        playerBox.classList.remove("started");
-        playerBox.classList.add("paused");
+      document.getElementById(`pauseBtn${i}`).onclick = () => {
+        pauseTimer(i); toggleButtons(i, 'paused');
+        div.classList.add("paused"); div.classList.remove("started");
         updateCounts();
       };
 
-      resumeBtn.onclick = () => {
-        resumeTimer(i);
-        toggleButtons(i, 'started');
-        playerBox.classList.add("started");
-        playerBox.classList.remove("paused");
+      document.getElementById(`resumeBtn${i}`).onclick = () => {
+        resumeTimer(i); toggleButtons(i, 'started');
+        div.classList.add("started"); div.classList.remove("paused");
         updateCounts();
       };
 
-      resetBtn.onclick = () => {
-        resetTimer(i);
-        toggleButtons(i, 'initial');
-        playerBox.classList.remove("started", "paused");
+      document.getElementById(`resetBtn${i}`).onclick = () => {
+        resetTimer(i); toggleButtons(i, 'initial');
+        div.classList.remove("started", "paused");
         updateCounts();
       };
     }
@@ -346,15 +291,12 @@
     function startTimer(i) {
       const playerKey = `player${i}`;
       let stored = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime: 0, startTime: 0, isRunning: false };
-
       if (!stored.isRunning) {
         stored.startTime = Date.now();
         stored.isRunning = true;
         localStorage.setItem(playerKey, JSON.stringify(stored));
       }
-
       if (intervals[i]) clearInterval(intervals[i]);
-
       intervals[i] = setInterval(() => {
         let data = JSON.parse(localStorage.getItem(playerKey));
         if (!data || !data.isRunning) return clearInterval(intervals[i]);
@@ -367,13 +309,10 @@
       const playerKey = `player${i}`;
       let stored = JSON.parse(localStorage.getItem(playerKey));
       if (!stored || !stored.isRunning) return;
-
-      const elapsed = stored.elapsedTime + (Date.now() - stored.startTime);
-      stored.elapsedTime = elapsed;
+      stored.elapsedTime += Date.now() - stored.startTime;
       stored.isRunning = false;
       stored.startTime = 0;
       localStorage.setItem(playerKey, JSON.stringify(stored));
-
       if (intervals[i]) clearInterval(intervals[i]);
       updateDisplay(i, stored.elapsedTime);
     }
@@ -382,13 +321,9 @@
       const playerKey = `player${i}`;
       let stored = JSON.parse(localStorage.getItem(playerKey));
       if (!stored) return;
-
-      if (!stored.isRunning) {
-        stored.startTime = Date.now();
-        stored.isRunning = true;
-        localStorage.setItem(playerKey, JSON.stringify(stored));
-      }
-
+      stored.startTime = Date.now();
+      stored.isRunning = true;
+      localStorage.setItem(playerKey, JSON.stringify(stored));
       if (intervals[i]) clearInterval(intervals[i]);
       intervals[i] = setInterval(() => {
         let data = JSON.parse(localStorage.getItem(playerKey));
@@ -398,41 +333,33 @@
       }, 1000);
     }
 
-    function resetTimer(i) {
-      const playerKey = `player${i}`;
-      localStorage.removeItem(playerKey);
-      if (intervals[i]) clearInterval(intervals[i]);
-      updateDisplay(i, 0);
-    }
+  function resetTimer(i) {
+  const playerKey = `player${i}`;
+  localStorage.removeItem(playerKey);
+  if (intervals[i]) clearInterval(intervals[i]);
 
-    function updateDisplay(i, elapsed) {
-      document.getElementById(`time${i}`).textContent = format(elapsed);
-      const hours = elapsed / (1000 * 60 * 60);
-      const cost = Math.floor(hours * pricePerHour);
-      document.getElementById(`cost${i}`).textContent = `💰 ${cost} دینار`;
-    }
+  // Reset UI
+  document.getElementById(`time${i}`).textContent = "00:00:00";
+  document.getElementById(`cost${i}`).textContent = "💰 0 دینار";
+  document.getElementById(`nameInput${i}`).value = "";
+  document.getElementById(`playerName${i}`).textContent = `PC ${i}`;
+}
 
     function updateCounts() {
-      let startedCount = 0;
-      let notStartedCount = 0;
+      let started = 0, notStarted = 0;
       for (let i = 1; i <= numPlayers; i++) {
-        const playerKey = `player${i}`;
-        let stored = JSON.parse(localStorage.getItem(playerKey));
-        if (stored && stored.isRunning) {
-          startedCount++;
-        } else {
-          notStartedCount++;
-        }
+        const data = JSON.parse(localStorage.getItem(`player${i}`));
+        if (data?.isRunning) started++;
+        else notStarted++;
       }
-      document.getElementById('countStarted').textContent = startedCount;
-      document.getElementById('countNotStarted').textContent = notStartedCount;
+      document.getElementById('countStarted').textContent = started;
+      document.getElementById('countNotStarted').textContent = notStarted;
     }
 
     function pauseAll() {
       for (let i = 1; i <= numPlayers; i++) {
-        const playerKey = `player${i}`;
-        let stored = JSON.parse(localStorage.getItem(playerKey));
-        if (stored && stored.isRunning) {
+        const data = JSON.parse(localStorage.getItem(`player${i}`));
+        if (data?.isRunning) {
           pauseTimer(i);
           toggleButtons(i, 'paused');
           document.getElementById(`playerBox${i}`).classList.remove("started");
@@ -444,9 +371,8 @@
 
     function startAll() {
       for (let i = 1; i <= numPlayers; i++) {
-        const playerKey = `player${i}`;
-        let stored = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime: 0, startTime: 0, isRunning: false };
-        if (!stored.isRunning) {
+        const data = JSON.parse(localStorage.getItem(`player${i}`)) || {};
+        if (!data.isRunning) {
           startTimer(i);
           toggleButtons(i, 'started');
           document.getElementById(`playerBox${i}`).classList.add("started");
@@ -467,6 +393,48 @@
       }
     }
 
+    function addFood() {
+      const pcNum = document.getElementById('foodTargetSelect').value;
+      const foodName = document.getElementById('foodNameInput').value.trim();
+      const foodPrice = parseInt(document.getElementById('foodPriceInput').value.trim());
+
+      if (!pcNum || !foodName || isNaN(foodPrice)) {
+        alert("تکایە هەموو خانەکان پڕبکەوە.");
+        return;
+      }
+
+      const playerKey = `player${pcNum}`;
+      let stored = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime: 0, startTime: 0, isRunning: false, foodTotal: 0, foodItems: [] };
+      stored.foodTotal = (stored.foodTotal || 0) + foodPrice;
+      stored.foodItems = stored.foodItems || [];
+      stored.foodItems.push({ name: foodName, price: foodPrice });
+      localStorage.setItem(playerKey, JSON.stringify(stored));
+      updateDisplay(pcNum, stored.elapsedTime);
+      document.getElementById('foodNameInput').value = '';
+      document.getElementById('foodPriceInput').value = '';
+      document.getElementById('foodTargetSelect').selectedIndex = 0;
+    }
+
+    function showFoodList() {
+      const pcNum = document.getElementById('foodTargetSelect').value;
+
+      if (!pcNum || pcNum === "PC یەک هەلبژێرە") {
+        alert("تکایە یەکێک لە پەیسی یاریزان هەلبژێرە.");
+        return;
+      }
+
+      const playerKey = `player${pcNum}`;
+      const stored = JSON.parse(localStorage.getItem(playerKey));
+      const items = stored?.foodItems || [];
+
+      if (items.length === 0) {
+        alert(`هیچ خواردنێک بۆ PC ${pcNum} زیاد نەکراوە.`);
+      } else {
+        const list = items.map(item => `🍔 ${item.name} - ${item.price} دینار`).join('\n');
+        alert(`📋 لیستی خواردنەکان بۆ PC ${pcNum}:\n\n${list}`);
+      }
+    }
+
     for (let i = 1; i <= numPlayers; i++) {
       loadPlayer(i);
     }
@@ -475,3 +443,5 @@
   </script>
 </body>
 </html>
+
+
