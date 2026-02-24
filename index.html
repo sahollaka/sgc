@@ -41,17 +41,28 @@
       border-radius: 12px;
       padding: 15px;
       border: 6px solid rgb(8, 81, 146);
-      box-shadow: 0 4px 12px rgba(255, 76, 76, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       text-align: center;
-      transition: 0.3s ease;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .player:hover {
+        transform: translateY(-5px);
     }
     .player.started {
-      border: 6px solid rgb(6, 96, 6);
+      border-color: rgb(6, 96, 6);
       background-color: #002005;
     }
     .player.paused {
-      border: 6px solid rgb(99, 8, 8);
+      border-color: rgb(99, 8, 8);
       background-color: rgb(44, 2, 2);
+    }
+    .player.has-food {
+      border-color: #ffd700;
+    }
+    .player.selected {
+        box-shadow: 0 0 20px 7px #3498db;
+        transform: scale(1.05);
     }
     .player h4 {
       margin-top: 0;
@@ -65,12 +76,12 @@
       font-size: 24px;
       margin: 8px 0;
     }
-    .time.running { color: #00ff00; }
-    .time.paused { color: #ff3333; }
     .cost {
       font-size: 20px;
       color: #ffd700;
       margin-bottom: 10px;
+      padding: 5px;
+      border-radius: 5px;
     }
     button {
       border: none;
@@ -87,6 +98,12 @@
     .pause-btn { background-color: #ff4c4c; }
     .resume-btn { background-color: #4CAF50; }
     .reset-btn { background-color: #ff6600; }
+    
+    .start-btn, .pause-btn, .resume-btn, .reset-btn {
+        cursor: pointer;
+        z-index: 10;
+        position: relative;
+    }
     table {
       width: 300px;
       margin: 20px auto;
@@ -114,24 +131,51 @@
       margin-top: 0;
       margin-bottom: 12px;
     }
+    #manage-food-section {
+        margin-top: 15px;
+        background: #2c3e50;
+        padding: 15px;
+        border-radius: 8px;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+        display: none;
+    }
+    #manage-food-list div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+        background: #34495e;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
   </style>
 </head>
 <body>
 
   <h2 class="main-title">🎮 Sahollaka Game Center</h2>
 
-  <!-- ➕ زیادکردنی پارەی خواردن -->
   <div style="margin-bottom: 30px; text-align:center;">
-    <h3 style="color:#ffd700;">➕ زیادکردنی پارەی خواردن</h3>
-    <select id="foodTargetSelect" style="padding:6px 10px; border-radius:8px;">
-      <option disabled selected>PC یەک هەلبژێرە</option>
-      <!-- Options will be populated by JavaScript -->
-    </select>
-    <input type="text" id="foodNameInput" placeholder="ناوی خواردن" style="padding:6px 10px; border-radius:8px; margin-left:8px;" />
-    <input type="number" id="foodPriceInput" placeholder="نرخی دینار" style="padding:6px 10px; border-radius:8px; margin-left:8px; width:100px;" />
-    <button onclick="addFood()" style="background:#ffb300;" class="global-btn">➕ زیاد بکە</button>
+    <h3 style="color:#ffd700;">🛒 زیادکردنی خواردن و خواردنەوە</h3>
+    <h4 style="color: #3498db;">PCـی هەڵبژێردراو: <span id="selected-pc-display">هیچ</span></h4>
     <button onclick="showFoodList()" style="background:#0088cc;" class="global-btn">🍔 خواردنەکان</button>
+    <br><br>
+    
+    <div id="quick-food-buttons"></div>
+    <br>
+    <button onclick="toggleManageFood()" style="background:#8e44ad;" class="global-btn">⚙️ دەستکاریکردنی دوگمە خێراکان</button>
+    
+    <div id="manage-food-section">
+        <h4>دروستکردن / سڕینەوەی دوگمە</h4>
+        <input type="text" id="newFoodName" placeholder="ناوی خواردن (ئارەزوومەندانە)" style="padding:6px 10px; border-radius:8px;" />
+        <input type="number" id="newFoodPrice" placeholder="نرخی دینار" style="padding:6px 10px; border-radius:8px; width:100px;" />
+        <button onclick="addQuickFoodButton()" style="background:#27ae60;" class="global-btn">➕ زیاد بکە</button>
+        <hr style="border-color: #7f8c8d; margin: 15px 0;">
+        <div id="manage-food-list"></div>
+    </div>
   </div>
+
 
   <!-- Global Controls -->
   <div style="text-align:center; margin-bottom: 30px;">
@@ -158,7 +202,7 @@
 
   <div id="players"></div>
 
-  <!-- New Section for Special Timers (Initially Hidden) -->
+  <!-- Special Timers Section -->
   <div id="special-timers-section" style="display:none;">
     <hr style="margin: 30px auto; border-color: #555; width: 80%;">
     <h2 class="main-title" style="font-size: 32px; color: #9b59b6;">🔐 Private Timers</h2>
@@ -166,11 +210,12 @@
   </div>
 
   <script>
-    let numPlayers = 40; // Changed to let to allow modification
+    let numPlayers = 40; 
     const playersDiv = document.getElementById('players');
     const pricePerHour = 3000;
     let intervals = {};
     let specialTimersLoaded = false;
+    let selectedPC = null;
 
     function format(ms) {
       const totalSeconds = Math.floor(ms / 1000);
@@ -178,6 +223,19 @@
       const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
       const s = String(totalSeconds % 60).padStart(2, '0');
       return `${h}:${m}:${s}`;
+    }
+    
+    function selectPC(pcNum) {
+        if (selectedPC) {
+            const oldSelection = document.getElementById(`playerBox${selectedPC}`);
+            if (oldSelection) oldSelection.classList.remove('selected');
+        }
+        
+        selectedPC = pcNum;
+        const newSelection = document.getElementById(`playerBox${pcNum}`);
+        newSelection.classList.add('selected');
+
+        document.getElementById('selected-pc-display').textContent = `PC ${pcNum}`;
     }
 
     function toggleButtons(i, state) {
@@ -198,6 +256,16 @@
       document.getElementById(`cost${i}`).textContent = `🎮 ${gameCost} + 🍔 ${foodCost} = 💰 ${totalCost} دینار`;
     }
 
+    function checkAndApplyFoodHighlight(pcNum) {
+        const stored = JSON.parse(localStorage.getItem(`player${pcNum}`));
+        const playerBox = document.getElementById(`playerBox${pcNum}`);
+        if (stored && stored.foodTotal > 0) {
+            playerBox.classList.add('has-food');
+        } else {
+            playerBox.classList.remove('has-food');
+        }
+    }
+
     function loadPlayer(i, container = playersDiv) {
       const playerKey = `player${i}`;
       const div = document.createElement('div');
@@ -208,35 +276,44 @@
         <input type="text" id="nameInput${i}" class="name-input" placeholder="ناوی یاریزان" />
         <div class="time" id="time${i}">00:00:00</div>
         <div class="cost" id="cost${i}">💰 0 دینار</div>
-        <button id="startBtn${i}" class="start-btn">Start</button>
-        <button id="pauseBtn${i}" class="pause-btn" style="display:none;">Pause</button>
-        <button id="resumeBtn${i}" class="resume-btn" style="display:none;">Resume</button>
-        <button id="resetBtn${i}" class="reset-btn" style="display:none;">Reset</button>
+        <div class="buttons-wrapper">
+            <button id="startBtn${i}" class="start-btn">Start</button>
+            <button id="pauseBtn${i}" class="pause-btn" style="display:none;">Pause</button>
+            <button id="resumeBtn${i}" class="resume-btn" style="display:none;">Resume</button>
+            <button id="resetBtn${i}" class="reset-btn" style="display:none;">Reset</button>
+        </div>
       `;
       container.appendChild(div);
+
+      div.addEventListener('click', (e) => {
+          if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+            selectPC(i);
+          }
+      });
 
       const nameInput = document.getElementById(`nameInput${i}`);
       const playerName = document.getElementById(`playerName${i}`);
       let stored = JSON.parse(localStorage.getItem(playerKey));
 
-      if (stored && stored.name) {
-        nameInput.value = stored.name;
-        playerName.textContent = stored.name;
-      }
+      if (stored && stored.name) { nameInput.value = stored.name; playerName.textContent = stored.name; }
 
       if (!stored) {
         toggleButtons(i, 'initial');
+         updateDisplay(i, 0); 
       } else {
-        if (stored.isRunning) {
-          startTimer(i);
-          toggleButtons(i, 'started');
-          div.classList.add("started");
+        let currentElapsedTime = stored.isRunning ? (stored.elapsedTime + (Date.now() - stored.startTime)) : stored.elapsedTime;
+        updateDisplay(i, currentElapsedTime);
+
+        if(stored.isRunning){
+            startTimer(i); toggleButtons(i, 'started'); div.classList.add("started");
         } else if (stored.elapsedTime > 0) {
-          updateDisplay(i, stored.elapsedTime);
-          toggleButtons(i, 'paused');
-          div.classList.add("paused");
+            toggleButtons(i, 'paused'); div.classList.add("paused");
+        } else {
+            toggleButtons(i, 'initial');
         }
       }
+
+      checkAndApplyFoodHighlight(i);
 
       nameInput.addEventListener('input', () => {
         let data = JSON.parse(localStorage.getItem(playerKey)) || {};
@@ -245,33 +322,18 @@
         playerName.textContent = nameInput.value || `PC ${i}`;
       });
 
-      document.getElementById(`startBtn${i}`).onclick = () => {
-        startTimer(i); toggleButtons(i, 'started');
-        div.classList.add("started"); div.classList.remove("paused");
-        updateCounts();
-      };
-      document.getElementById(`pauseBtn${i}`).onclick = () => {
-        pauseTimer(i); toggleButtons(i, 'paused');
-        div.classList.add("paused"); div.classList.remove("started");
-        updateCounts();
-      };
-      document.getElementById(`resumeBtn${i}`).onclick = () => {
-        resumeTimer(i); toggleButtons(i, 'started');
-        div.classList.add("started"); div.classList.remove("paused");
-        updateCounts();
-      };
-      document.getElementById(`resetBtn${i}`).onclick = () => {
-        resetTimer(i); toggleButtons(i, 'initial');
-        div.classList.remove("started", "paused");
-        updateCounts();
-      };
+      document.getElementById(`startBtn${i}`).onclick = () => { startTimer(i); toggleButtons(i, 'started'); div.classList.add("started"); div.classList.remove("paused"); updateCounts(); };
+      document.getElementById(`pauseBtn${i}`).onclick = () => { pauseTimer(i); toggleButtons(i, 'paused'); div.classList.add("paused"); div.classList.remove("started"); updateCounts(); };
+      document.getElementById(`resumeBtn${i}`).onclick = () => { resumeTimer(i); toggleButtons(i, 'started'); div.classList.add("started"); div.classList.remove("paused"); updateCounts(); };
+      document.getElementById(`resetBtn${i}`).onclick = () => { resetTimer(i); };
     }
 
     function startTimer(i) {
       const playerKey = `player${i}`;
-      let stored = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime: 0, startTime: 0, isRunning: false };
+      let stored = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime: 0, startTime: 0, isRunning: false, foodTotal: 0, foodItems: [] };
       if (!stored.isRunning) {
         stored.startTime = Date.now();
+        if(!stored.elapsedTime) stored.elapsedTime = 0;
         stored.isRunning = true;
         localStorage.setItem(playerKey, JSON.stringify(stored));
       }
@@ -296,147 +358,128 @@
       updateDisplay(i, stored.elapsedTime);
     }
 
-    function resumeTimer(i) {
-      const playerKey = `player${i}`;
-      let stored = JSON.parse(localStorage.getItem(playerKey));
-      if (!stored) return;
-      stored.startTime = Date.now();
-      stored.isRunning = true;
-      localStorage.setItem(playerKey, JSON.stringify(stored));
-      if (intervals[i]) clearInterval(intervals[i]);
-      intervals[i] = setInterval(() => {
-        let data = JSON.parse(localStorage.getItem(playerKey));
-        if (!data || !data.isRunning) return clearInterval(intervals[i]);
-        const elapsed = data.elapsedTime + (Date.now() - data.startTime);
-        updateDisplay(i, elapsed);
-      }, 1000);
-    }
+    function resumeTimer(i) { startTimer(i); }
 
     function resetTimer(i) {
       const playerKey = `player${i}`;
       localStorage.removeItem(playerKey);
       if (intervals[i]) clearInterval(intervals[i]);
+      
+      const div = document.getElementById(`playerBox${i}`);
+      toggleButtons(i, 'initial'); 
+      div.classList.remove("started", "paused", "has-food");
+      
       document.getElementById(`time${i}`).textContent = "00:00:00";
       document.getElementById(`cost${i}`).textContent = "💰 0 دینار";
       document.getElementById(`nameInput${i}`).value = "";
       document.getElementById(`playerName${i}`).textContent = `PC ${i}`;
+
+      if (selectedPC === i) {
+          selectedPC = null;
+          document.getElementById('selected-pc-display').textContent = 'هیچ';
+          div.classList.remove('selected');
+      }
+      updateCounts();
     }
 
     function updateCounts() {
       let started = 0, notStarted = 0;
       for (let i = 1; i <= numPlayers; i++) {
         const data = JSON.parse(localStorage.getItem(`player${i}`));
-        if (data?.isRunning) started++;
-        else notStarted++;
+        (data?.isRunning) ? started++ : notStarted++;
       }
       document.getElementById('countStarted').textContent = started;
       document.getElementById('countNotStarted').textContent = notStarted;
     }
 
-    function pauseAll() {
-      for (let i = 1; i <= numPlayers; i++) {
-        const data = JSON.parse(localStorage.getItem(`player${i}`));
-        if (data?.isRunning) {
-          pauseTimer(i);
-          toggleButtons(i, 'paused');
-          document.getElementById(`playerBox${i}`).classList.remove("started");
-          document.getElementById(`playerBox${i}`).classList.add("paused");
-        }
-      }
-      updateCounts();
+    function pauseAll() { for (let i = 1; i <= numPlayers; i++) { if (JSON.parse(localStorage.getItem(`player${i}`))?.isRunning) { pauseTimer(i); toggleButtons(i, 'paused'); document.getElementById(`playerBox${i}`).classList.add("paused"); document.getElementById(`playerBox${i}`).classList.remove("started"); } } updateCounts(); }
+    function startAll() { for (let i = 1; i <= numPlayers; i++) { if (!JSON.parse(localStorage.getItem(`player${i}`))?.isRunning) { startTimer(i); toggleButtons(i, 'started'); document.getElementById(`playerBox${i}`).classList.add("started"); document.getElementById(`playerBox${i}`).classList.remove("paused"); } } updateCounts(); }
+
+    function resetAll() { if (confirm("دڵنیایت دەتەوێت هەموو تایمەرەکان ڕیستارت بکەیت؟")) { for (let i = 1; i <= numPlayers; i++) { resetTimer(i); } updateCounts(); if (selectedPC) { document.getElementById(`playerBox${selectedPC}`).classList.remove('selected'); selectedPC = null; document.getElementById('selected-pc-display').textContent = 'هیچ'; } } }
+    
+    function addFoodToBill(pcNum, name, price) {
+        const playerKey = `player${pcNum}`;
+        let stored = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime: 0, startTime: 0, isRunning: false, foodTotal: 0, foodItems: [] };
+        stored.foodTotal = (stored.foodTotal || 0) + price;
+        stored.foodItems = stored.foodItems || [];
+        stored.foodItems.push({ name: name, price: price });
+        localStorage.setItem(playerKey, JSON.stringify(stored));
+        
+        const currentElapsedTime = stored.isRunning ? (stored.elapsedTime + (Date.now() - stored.startTime)) : stored.elapsedTime;
+        updateDisplay(pcNum, currentElapsedTime);
+        checkAndApplyFoodHighlight(pcNum);
+    }
+    
+    function quickAdd(name, price) {
+        const pcNum = selectedPC;
+        if (!pcNum) { alert("تکایە سەرەتا کلیک لەسەر یەکێک لە تایمەرەکان بکە بۆ هەڵبژاردنی!"); return; }
+        addFoodToBill(pcNum, name, price);
+    }
+    
+    function toggleManageFood() {
+        const section = document.getElementById('manage-food-section');
+        section.style.display = (section.style.display === 'none') ? 'block' : 'none';
     }
 
-    function startAll() {
-      for (let i = 1; i <= numPlayers; i++) {
-        const data = JSON.parse(localStorage.getItem(`player${i}`)) || {};
-        if (!data.isRunning) {
-          startTimer(i);
-          toggleButtons(i, 'started');
-          document.getElementById(`playerBox${i}`).classList.add("started");
-          document.getElementById(`playerBox${i}`).classList.remove("paused");
-        }
-      }
-      updateCounts();
+    function getQuickFoods() { return JSON.parse(localStorage.getItem('quickFoods')) || []; }
+    function saveQuickFoods(foods) { localStorage.setItem('quickFoods', JSON.stringify(foods)); }
+
+    function loadQuickFoodButtons() {
+        const foods = getQuickFoods();
+        const container = document.getElementById('quick-food-buttons');
+        const manageList = document.getElementById('manage-food-list');
+        container.innerHTML = '';
+        manageList.innerHTML = '';
+
+        foods.forEach((food, index) => {
+            const displayName = food.name ? `${food.name} (${food.price})` : `${food.price}`;
+            container.innerHTML += `<button class="global-btn" style="background-color: #e67e22;" onclick="quickAdd('${food.name || ''}', ${food.price})">${displayName}</button>`;
+            manageList.innerHTML += `<div><span>${displayName}</span><button style="background:#c0392b; padding: 2px 8px; font-size: 12px;" onclick="deleteQuickFoodButton(${index})">سڕینەوە</button></div>`;
+        });
     }
 
-    function resetAll() {
-      if (confirm("دڵنیایت دەتەوێت هەموو تایمەرەکان ڕیستارت بکەیت؟")) {
-        for (let i = 1; i <= numPlayers; i++) {
-          resetTimer(i);
-          toggleButtons(i, 'initial');
-          document.getElementById(`playerBox${i}`).classList.remove("started", "paused");
-        }
-        updateCounts();
-      }
+    function addQuickFoodButton() {
+        const nameInput = document.getElementById('newFoodName');
+        const priceInput = document.getElementById('newFoodPrice');
+        const price = parseInt(priceInput.value);
+
+        if (!price || isNaN(price)) { alert("تکایە نرخێکی دروست بنووسە."); return; }
+        
+        const foods = getQuickFoods();
+        foods.push({ name: nameInput.value.trim(), price: price });
+        saveQuickFoods(foods);
+        loadQuickFoodButtons();
+
+        nameInput.value = '';
+        priceInput.value = '';
     }
 
-    function populateDropdown() {
-        const select = document.getElementById('foodTargetSelect');
-        const currentVal = select.value;
-        select.innerHTML = '<option disabled selected>PC یەک هەلبژێرە</option>';
-        for (let i = 1; i <= numPlayers; i++) {
-            select.innerHTML += `<option value="${i}">PC ${i}</option>`;
-        }
-        if (currentVal) select.value = currentVal;
-    }
-
-    function addFood() {
-      const pcNum = document.getElementById('foodTargetSelect').value;
-      const foodName = document.getElementById('foodNameInput').value.trim();
-      const foodPrice = parseInt(document.getElementById('foodPriceInput').value.trim());
-      if (!pcNum || !foodName || isNaN(foodPrice)) {
-        alert("تکایە هەموو خانەکان پڕبکەوە.");
-        return;
-      }
-      const playerKey = `player${pcNum}`;
-      let stored = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime: 0, startTime: 0, isRunning: false, foodTotal: 0, foodItems: [] };
-      stored.foodTotal = (stored.foodTotal || 0) + foodPrice;
-      stored.foodItems = stored.foodItems || [];
-      stored.foodItems.push({ name: foodName, price: foodPrice });
-      localStorage.setItem(playerKey, JSON.stringify(stored));
-      updateDisplay(pcNum, stored.elapsedTime > 0 ? stored.elapsedTime : 0);
-      document.getElementById('foodNameInput').value = '';
-      document.getElementById('foodPriceInput').value = '';
-      document.getElementById('foodTargetSelect').selectedIndex = 0;
+    function deleteQuickFoodButton(index) {
+        if (!confirm("دڵنیایت دەتەوێت ئەم دوگمەیە بسڕیتەوە؟")) return;
+        const foods = getQuickFoods();
+        foods.splice(index, 1);
+        saveQuickFoods(foods);
+        loadQuickFoodButtons();
     }
 
     function showFoodList() {
-      const pcNum = document.getElementById('foodTargetSelect').value;
-      if (!pcNum || pcNum === "PC یەک هەلبژێرە") {
-        alert("تکایە یەکێک لە پەیسی یاریزان هەلبژێرە.");
-        return;
-      }
-      const playerKey = `player${pcNum}`;
-      const stored = JSON.parse(localStorage.getItem(playerKey));
+      const pcNum = selectedPC;
+      if (!pcNum) { alert("تکایە سەرەتا PCیەک هەڵبژێرە!"); return; }
+      const stored = JSON.parse(localStorage.getItem(`player${pcNum}`));
       const items = stored?.foodItems || [];
-      if (items.length === 0) {
-        alert(`هیچ خواردنێک بۆ PC ${pcNum} زیاد نەکراوە.`);
-      } else {
-        const list = items.map(item => `🍔 ${item.name} - ${item.price} دینار`).join('\n');
-        alert(`📋 لیستی خواردنەکان بۆ PC ${pcNum}:\n\n${list}`);
-      }
+      const list = items.length > 0 ? items.map(item => `🍔 ${item.name || 'خواردن'} - ${item.price} دینار`).join('\n') : `هیچ خواردنێک بۆ PC ${pcNum} زیاد نەکراوە.`;
+      alert(`📋 لیستی خواردنەکان بۆ PC ${pcNum}:\n\n${list}`);
     }
 
     function showSpecialTimers() {
-        if (specialTimersLoaded) {
-            alert("تایمەرە تایبەتەکان پێشتر زیادکراون.");
-            return;
-        }
-
+        if (specialTimersLoaded) { alert("تایمەرە تایبەتەکان پێشتر زیادکراون."); return; }
         const password = prompt("بۆ کردنەوەی ئەم بەشە، تکایە پاسۆردەکە بنووسە:");
-        if (password === "11") { // The secret password
+        if (password === "11") { 
             document.getElementById('special-timers-section').style.display = 'block';
-            const specialPlayersContainer = document.getElementById('special-players');
-
             const newTotal = 40 + 10;
-            for (let i = 41; i <= newTotal; i++) {
-                loadPlayer(i, specialPlayersContainer);
-            }
-            
-            numPlayers = newTotal; // Update the total count
+            for (let i = 41; i <= newTotal; i++) { loadPlayer(i, document.getElementById('special-players')); }
+            numPlayers = newTotal; 
             specialTimersLoaded = true;
-            
-            populateDropdown(); // Update the dropdown to include new PCs
             updateCounts();
             alert("١٠ تایمەری تایبەت بە سەرکەوتوویی کرایەوە!");
         } else if (password != null && password !== "") { 
@@ -445,11 +488,9 @@
     }
 
     // Initial Load
-    for (let i = 1; i <= 40; i++) {
-      loadPlayer(i);
-    }
-    populateDropdown();
+    for (let i = 1; i <= 40; i++) { loadPlayer(i); }
     updateCounts();
+    loadQuickFoodButtons();
 
   </script>
 </body>
