@@ -3,138 +3,117 @@
 <head>
   <title>Game Center Timers</title>
   <style>
- body {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #111;
-  color: #eee;
-  padding: 20px;
-}
-
-.main-title {
-  text-align: center;
-  font-size: 48px;
-  font-weight: bold;
-  color: #c63636;
-  text-shadow: 0 0 10px #000000, 0 0 20px #250000;
-  margin-bottom: 10px;
-}
-
-.global-btn {
-  border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  margin: 5px;
-  transition: background 0.3s ease;
-}
-
-.global-btn:hover {
-  opacity: 0.85;
-}
-
-#players {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 15px;
-}
-
-.player {
-  background: #032648;
-  border-radius: 12px;
-  padding: 15px;
-  border: 6px solid rgb(8, 81, 146);
-  box-shadow: 0 4px 12px rgba(255, 76, 76, 0.1);
-  text-align: center;
-  transition: 0.3s ease;
-}
-
-.player.started {
-  border: 6px solid rgb(6, 96, 6);
-  background-color: #002005;
-  
-}
-
-.player.paused {
-  border: 6px solid rgb(99, 8, 8);
-  background-color: rgb(44, 2, 2);
-}
-
-.player h4 {
-  margin-top: 0;
-  margin-bottom: 4px;
-  font-size: 1.8em;
-  color: #408df7;
-}
-
-.player.started h4 { color: #0fa514; }
-.player.paused h4 { color: #a72929; }
-
-.time {
-  font-size: 24px;
-  margin: 8px 0;
-}
-
-.time.running { color: #00ff00; }
-.time.paused { color: #ff3333; }
-
-.cost {
-  font-size: 20px;
-  color: #ffd700;
-  margin-bottom: 10px;
-}
-
-button {
-  border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  font-size: 14px;
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-  margin: 4px;
-  transition: background 0.2s ease;
-}
-
-.start-btn { background-color: #4CAF50; }
-.pause-btn { background-color: #ff4c4c; }
-.resume-btn { background-color: #4CAF50; }
-.reset-btn { background-color: #ff6600; }
-
-table {
-  width: 300px;
-  margin: 20px auto;
-  border-collapse: collapse;
-  color: #eee;
-}
-
-table, th, td {
-  border: 1px solid #555;
-}
-
-th, td {
-  padding: 8px 12px;
-  text-align: center;
-}
-
-th {
-  background-color: #444;
-}
-
-#players input.name-input {
-  width: 90%;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #888;
-  font-size: 1em;
-  background: #222;
-  color: #eee;
-  margin-top: 0;
-  margin-bottom: 12px;
-}
-
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #111111;
+      color: #eee;
+      padding: 20px;
+    }
+    .main-title {
+      text-align: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: #c63636;
+      text-shadow: 0 0 10px #000000, 0 0 20px #250000;
+      margin-bottom: 10px;
+    }
+    .global-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+      transition: background 0.3s ease;
+    }
+    .global-btn:hover {
+      opacity: 0.85;
+    }
+    #players, #special-players {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+    }
+    .player {
+      background: #032648;
+      border-radius: 12px;
+      padding: 15px;
+      border: 6px solid rgb(8, 81, 146);
+      box-shadow: 0 4px 12px rgba(255, 76, 76, 0.1);
+      text-align: center;
+      transition: 0.3s ease;
+    }
+    .player.started {
+      border: 6px solid rgb(6, 96, 6);
+      background-color: #002005;
+    }
+    .player.paused {
+      border: 6px solid rgb(99, 8, 8);
+      background-color: rgb(44, 2, 2);
+    }
+    .player h4 {
+      margin-top: 0;
+      margin-bottom: 4px;
+      font-size: 1.8em;
+      color: #408df7;
+    }
+    .player.started h4 { color: #0fa514; }
+    .player.paused h4 { color: #a72929; }
+    .time {
+      font-size: 24px;
+      margin: 8px 0;
+    }
+    .time.running { color: #00ff00; }
+    .time.paused { color: #ff3333; }
+    .cost {
+      font-size: 20px;
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 14px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 4px;
+      transition: background 0.2s ease;
+    }
+    .start-btn { background-color: #4CAF50; }
+    .pause-btn { background-color: #ff4c4c; }
+    .resume-btn { background-color: #4CAF50; }
+    .reset-btn { background-color: #ff6600; }
+    table {
+      width: 300px;
+      margin: 20px auto;
+      border-collapse: collapse;
+      color: #eee;
+    }
+    table, th, td {
+      border: 1px solid #555;
+    }
+    th, td {
+      padding: 8px 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #444;
+    }
+    #players input.name-input, #special-players input.name-input {
+      width: 90%;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #888;
+      font-size: 1em;
+      background: #222;
+      color: #eee;
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
   </style>
 </head>
 <body>
@@ -146,11 +125,7 @@ th {
     <h3 style="color:#ffd700;">➕ زیادکردنی پارەی خواردن</h3>
     <select id="foodTargetSelect" style="padding:6px 10px; border-radius:8px;">
       <option disabled selected>PC یەک هەلبژێرە</option>
-      <script>
-        for (let i = 1; i <= 40; i++) {
-          document.write(`<option value="${i}">PC ${i}</option>`);
-        }
-      </script>
+      <!-- Options will be populated by JavaScript -->
     </select>
     <input type="text" id="foodNameInput" placeholder="ناوی خواردن" style="padding:6px 10px; border-radius:8px; margin-left:8px;" />
     <input type="number" id="foodPriceInput" placeholder="نرخی دینار" style="padding:6px 10px; border-radius:8px; margin-left:8px; width:100px;" />
@@ -162,7 +137,8 @@ th {
   <div style="text-align:center; margin-bottom: 30px;">
     <button onclick="pauseAll()" style="background:#ff4c4c;" class="global-btn">⏸️ Pause All</button>
     <button onclick="startAll()" style="background:#4CAF50;" class="global-btn">▶️ Start All</button>
-    <button onclick="resetAll()" style="background:#ff6600;" class="global-btn">🔄 Reset All </button>
+    <button onclick="resetAll()" style="background:#ff6600;" class="global-btn">🔄 Reset All</button>
+    <button onclick="showSpecialTimers()" style="background:#9b59b6;" class="global-btn">10 pc</button>
   </div>
 
   <table>
@@ -182,11 +158,19 @@ th {
 
   <div id="players"></div>
 
+  <!-- New Section for Special Timers (Initially Hidden) -->
+  <div id="special-timers-section" style="display:none;">
+    <hr style="margin: 30px auto; border-color: #555; width: 80%;">
+    <h2 class="main-title" style="font-size: 32px; color: #9b59b6;">🔐 Private Timers</h2>
+    <div id="special-players"></div>
+  </div>
+
   <script>
-    const numPlayers = 40;
+    let numPlayers = 40; // Changed to let to allow modification
     const playersDiv = document.getElementById('players');
     const pricePerHour = 3000;
     let intervals = {};
+    let specialTimersLoaded = false;
 
     function format(ms) {
       const totalSeconds = Math.floor(ms / 1000);
@@ -207,16 +191,14 @@ th {
       document.getElementById(`time${i}`).textContent = format(elapsed);
       const hours = elapsed / (1000 * 60 * 60);
       const gameCost = Math.floor(hours * pricePerHour);
-
       const playerKey = `player${i}`;
       let stored = JSON.parse(localStorage.getItem(playerKey));
       const foodCost = stored?.foodTotal || 0;
-
       const totalCost = gameCost + foodCost;
       document.getElementById(`cost${i}`).textContent = `🎮 ${gameCost} + 🍔 ${foodCost} = 💰 ${totalCost} دینار`;
     }
 
-    function loadPlayer(i) {
+    function loadPlayer(i, container = playersDiv) {
       const playerKey = `player${i}`;
       const div = document.createElement('div');
       div.className = 'player';
@@ -231,7 +213,7 @@ th {
         <button id="resumeBtn${i}" class="resume-btn" style="display:none;">Resume</button>
         <button id="resetBtn${i}" class="reset-btn" style="display:none;">Reset</button>
       `;
-      playersDiv.appendChild(div);
+      container.appendChild(div);
 
       const nameInput = document.getElementById(`nameInput${i}`);
       const playerName = document.getElementById(`playerName${i}`);
@@ -268,19 +250,16 @@ th {
         div.classList.add("started"); div.classList.remove("paused");
         updateCounts();
       };
-
       document.getElementById(`pauseBtn${i}`).onclick = () => {
         pauseTimer(i); toggleButtons(i, 'paused');
         div.classList.add("paused"); div.classList.remove("started");
         updateCounts();
       };
-
       document.getElementById(`resumeBtn${i}`).onclick = () => {
         resumeTimer(i); toggleButtons(i, 'started');
         div.classList.add("started"); div.classList.remove("paused");
         updateCounts();
       };
-
       document.getElementById(`resetBtn${i}`).onclick = () => {
         resetTimer(i); toggleButtons(i, 'initial');
         div.classList.remove("started", "paused");
@@ -333,17 +312,15 @@ th {
       }, 1000);
     }
 
-  function resetTimer(i) {
-  const playerKey = `player${i}`;
-  localStorage.removeItem(playerKey);
-  if (intervals[i]) clearInterval(intervals[i]);
-
-  // Reset UI
-  document.getElementById(`time${i}`).textContent = "00:00:00";
-  document.getElementById(`cost${i}`).textContent = "💰 0 دینار";
-  document.getElementById(`nameInput${i}`).value = "";
-  document.getElementById(`playerName${i}`).textContent = `PC ${i}`;
-}
+    function resetTimer(i) {
+      const playerKey = `player${i}`;
+      localStorage.removeItem(playerKey);
+      if (intervals[i]) clearInterval(intervals[i]);
+      document.getElementById(`time${i}`).textContent = "00:00:00";
+      document.getElementById(`cost${i}`).textContent = "💰 0 دینار";
+      document.getElementById(`nameInput${i}`).value = "";
+      document.getElementById(`playerName${i}`).textContent = `PC ${i}`;
+    }
 
     function updateCounts() {
       let started = 0, notStarted = 0;
@@ -393,23 +370,31 @@ th {
       }
     }
 
+    function populateDropdown() {
+        const select = document.getElementById('foodTargetSelect');
+        const currentVal = select.value;
+        select.innerHTML = '<option disabled selected>PC یەک هەلبژێرە</option>';
+        for (let i = 1; i <= numPlayers; i++) {
+            select.innerHTML += `<option value="${i}">PC ${i}</option>`;
+        }
+        if (currentVal) select.value = currentVal;
+    }
+
     function addFood() {
       const pcNum = document.getElementById('foodTargetSelect').value;
       const foodName = document.getElementById('foodNameInput').value.trim();
       const foodPrice = parseInt(document.getElementById('foodPriceInput').value.trim());
-
       if (!pcNum || !foodName || isNaN(foodPrice)) {
         alert("تکایە هەموو خانەکان پڕبکەوە.");
         return;
       }
-
       const playerKey = `player${pcNum}`;
       let stored = JSON.parse(localStorage.getItem(playerKey)) || { elapsedTime: 0, startTime: 0, isRunning: false, foodTotal: 0, foodItems: [] };
       stored.foodTotal = (stored.foodTotal || 0) + foodPrice;
       stored.foodItems = stored.foodItems || [];
       stored.foodItems.push({ name: foodName, price: foodPrice });
       localStorage.setItem(playerKey, JSON.stringify(stored));
-      updateDisplay(pcNum, stored.elapsedTime);
+      updateDisplay(pcNum, stored.elapsedTime > 0 ? stored.elapsedTime : 0);
       document.getElementById('foodNameInput').value = '';
       document.getElementById('foodPriceInput').value = '';
       document.getElementById('foodTargetSelect').selectedIndex = 0;
@@ -417,16 +402,13 @@ th {
 
     function showFoodList() {
       const pcNum = document.getElementById('foodTargetSelect').value;
-
       if (!pcNum || pcNum === "PC یەک هەلبژێرە") {
         alert("تکایە یەکێک لە پەیسی یاریزان هەلبژێرە.");
         return;
       }
-
       const playerKey = `player${pcNum}`;
       const stored = JSON.parse(localStorage.getItem(playerKey));
       const items = stored?.foodItems || [];
-
       if (items.length === 0) {
         alert(`هیچ خواردنێک بۆ PC ${pcNum} زیاد نەکراوە.`);
       } else {
@@ -435,13 +417,40 @@ th {
       }
     }
 
-    for (let i = 1; i <= numPlayers; i++) {
-      loadPlayer(i);
+    function showSpecialTimers() {
+        if (specialTimersLoaded) {
+            alert("تایمەرە تایبەتەکان پێشتر زیادکراون.");
+            return;
+        }
+
+        const password = prompt("بۆ کردنەوەی ئەم بەشە، تکایە پاسۆردەکە بنووسە:");
+        if (password === "11") { // The secret password
+            document.getElementById('special-timers-section').style.display = 'block';
+            const specialPlayersContainer = document.getElementById('special-players');
+
+            const newTotal = 40 + 10;
+            for (let i = 41; i <= newTotal; i++) {
+                loadPlayer(i, specialPlayersContainer);
+            }
+            
+            numPlayers = newTotal; // Update the total count
+            specialTimersLoaded = true;
+            
+            populateDropdown(); // Update the dropdown to include new PCs
+            updateCounts();
+            alert("١٠ تایمەری تایبەت بە سەرکەوتوویی کرایەوە!");
+        } else if (password != null && password !== "") { 
+            alert("پاسۆرد هەڵەیە. تکایە دووبارە هەوڵبدەوە.");
+        }
     }
 
+    // Initial Load
+    for (let i = 1; i <= 40; i++) {
+      loadPlayer(i);
+    }
+    populateDropdown();
     updateCounts();
+
   </script>
 </body>
 </html>
-
-
